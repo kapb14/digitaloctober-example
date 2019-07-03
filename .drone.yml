@@ -7,7 +7,7 @@ steps:
   image: plugins/docker
   settings:
     repo: kapb14/${DRONE_REPO_NAME}
-    context: src/src/
+    context: /drone/src/src/
     auto_tag: true
     #dockerfile: src/Dockerfile
     username:
