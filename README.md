@@ -1,6 +1,6 @@
 # Тестовое задание
 ---
-[![Build Status](https://ci.kapb14.me/api/badges/kapb14/digitaloctober-example/status.svg)](https://ci.kapb14.me/kapb14/digitaloctober-example)
+[![Build Status](http://drone.gke.kapb14.me/api/badges/kapb14/digitaloctober-example/status.svg)](http://drone.gke.kapb14.me/kapb14/digitaloctober-example)
 
 ---
 
