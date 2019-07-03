@@ -1,0 +1,6 @@
+tmp/logs/access.log
+tmp/logs/error.log
+certs/*
+.vscode/*
+.env
+tmp/
