@@ -1,67 +1,13 @@
-# nuxtjs-docker
-NuxtJS + NGINX (ssl) + Docker
+# Тестовое задание
 
-You can use this out of the box for nuxt ssr however you will need to update NGINX config files if you're using `nuxt generate`
+В ветке master присутствует актуальный код. В коде присутствуют инструкции для сборки образов и контейнеров на продакшен-окружении.
 
-#### Everyone else
-You may generate your own certificates (or use pre-existing), update your .env file to reflect the filepath of your certificates.
+Необходимо осуществить сборку проекта с помощью инструмента Drone.io https://docs.drone.io/installation/github/kubernetes/. Для размещения реестра и апи-сервера Kubernetes можно воспользоваться бесплатным аккаунтом (Google выдает 200 USD на 10 месяцев) https://kubernetes.io/docs/setup/turnkey/gce/ Для этого достаточно создать отдельный аккаунт в GCP. Результатом задания будет 1) работающая демонстративная площадка, pipeline сборки на которой настроен на текущий репозиторий на веб-хуке на событие "git push" в ветку "Master". 2) создать отдельную ветку от master, в которой разместить конфигурационные файлы сборки, затем создать Pull-request в ветку master на пользователя BinaryDistrictTeam.
 
-### NGINX Config
-#### For Dev
-You will need to create or use a pre-existing site from your hosts file
+Задача будет считаться выполненной, если 1) при внесении изменений в кодовую базу, на демострационной площадке после успешного процесса сборки появится изменение. 2) при внесении изменений в кодовую базу, после процесса сборки с ошибкой, демострационная площадка сохранит работоспособность, а процесс выполнения pull-request-a вернет ошибку.
 
-``` bash
-sudo vi /etc/hosts
-```
+Дополнить source/README.md инструкцией по запуску приложения на dev и инструкция для запуска на prod
 
-You will need to also change the server_name value in the NGINX config file (./config/dev.conf) for both http (80) and https (443)
-
-e.g. server_name nuxtjs-docker.dev; > server_name your_site.dev;
-#### For Prod (or other)
-Open your .env and change the value of ENVIRONMENT
-
-e.g. change "dev" to "prod"
-
-You will need to create a new NGINX config file, with a name matching the value of your ENVIRONMENT value.
-
-e.g. ./config/prod.conf
-
-You may copy the contents from ./config/dev.conf
-
-``` bash
-cp ./config/dev.conf ./config/prod.conf
-```
-
-You will need to update the server_name value in your new conf file.
-
-### Copy DOTENV
-``` bash
-cp .env.example .env
-```
-
-Update your DOTENV with the self signed certicate paths from above.
-
-### Generate
-``` bash
-# generate a static project
-npm run generate
-```
-
-### Lint
-``` bash
-npm run lint
-```
-
-#### Install
-You will need to run `npm install` the first time you setup docker, this will create your node_modules directory.
-``` bash
-npm install
-```
-
-#### Installing New Packages
-``` bash
-npm install package-name --save
-```
-
-## Running NuxtJS
-Make sure that you have updated the NGINX config as well as your DOTENV!
+#### Проверить что приложение Nuxt работает можно двумя способами:
+1) перейти в source/src/, поставить пакеты и запустить `npm run build && npm run start`, сайт откроется по ссылке `http://localhost:3000`
+2) в папке source создать `.env` как в инструкции (возможно файл конфигурации для прода тоже), далее запустить через `docker-compose build`, далее `docker-compose run nuxtjs npm run generate`, откроеется так же по ссылке `http://localhost:3000`
