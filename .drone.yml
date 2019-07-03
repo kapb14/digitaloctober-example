@@ -2,6 +2,12 @@ kind: pipeline
 name: default
 
 steps:
+- name: notify
+  image: plugins/slack
+  settings:
+    room: drone
+    webhook: https://hooks.slack.com/services/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
+
 - name: build-docker
   image: plugins/docker
   settings:
@@ -10,11 +16,6 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_password
-  #commands:
-  #- docker build -t ${DRONE_REPO_NAME}:${DRONE_COMMIT_SHA} ./src
-  #volumes:
-  #- name: docker
-  #  path: /var/run/docker.sock
 
 - name: publish
   image: plugins/gcr
@@ -34,19 +35,8 @@ steps:
 #  container: my-container
 #  tag: mytag
 
-
-
-- name: notify
-  image: plugins/slack
-  settings:
-    room: drone
-    webhook: https://hooks.slack.com/services/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
+#commands:
+#- docker build -t ${DRONE_REPO_NAME}:${DRONE_COMMIT_SHA} ./src
 
 
 
-
-
-volumes:
-- name: docker
-  host:
-    path: /var/run/docker.sock
