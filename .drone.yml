@@ -2,17 +2,12 @@ kind: pipeline
 name: default
 
 steps:
-- name: notify
-  image: plugins/slack
-  settings:
-    room: drone
-    webhook: https://hooks.slack.com/services/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
 
 - name: build-docker
   image: plugins/docker
   settings:
     repo: kapb14/${DRONE_REPO_NAME}
-    context: ./src
+    context: src/src/
     auto_tag: true
     #dockerfile: src/Dockerfile
     username:
@@ -20,6 +15,11 @@ steps:
     password:
       from_secret: docker_password
 
+- name: notify
+  image: plugins/slack
+  settings:
+    room: drone
+    webhook: https://hooks.slack.com/services/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
 
 - name: publish
   image: plugins/gcr
@@ -28,6 +28,12 @@ steps:
     tags: latest
     json_key:
       from_secret: google_credentials
+
+- name: notify
+  image: plugins/slack
+  settings:
+    room: drone
+    webhook: https://hooks.slack.com/services/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
 
 #- name: deploy
 #  image: quay.io/honestbee/drone-kubernetes
