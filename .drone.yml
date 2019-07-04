@@ -1,7 +1,14 @@
-kind: pipeline
-name: build
 # eu.gcr.io
 # digitaloctober-nuxt
+kind: pipeline
+name: build
+trigger:
+  branch:
+  - master
+  event:
+  - push
+  - pull_request
+
 steps:
 - name: inspect
   image: alpine
@@ -9,37 +16,37 @@ steps:
   - printenv | sort
   - find -name Dockerfile -type f
 
-- name: build-docker
+- name: build-and-push
   # image: plugins/docker
   image: plugins/gcr
   settings:
-    repo: eu.gcr.io/digitaloctober-nuxt/${DRONE_REPO_NAME}
-    # repo: kapb14/${DRONE_REPO_NAME}
-    auto_tag: true
     dockerfile: src/Dockerfile
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
+    auto_tag: true
+    tags: latest
+    registry: eu.gcr.io
+    repo: digitaloctober-nuxt/${DRONE_REPO_NAME}
     json_key:
       from_secret: registry_credentials
+    # repo: eu.gcr.io/digitaloctober-nuxt/${DRONE_REPO_NAME}
+    # repo: kapb14/${DRONE_REPO_NAME}
+    # username:
+    #   from_secret: docker_username
+    # password:
+    #   from_secret: docker_password
 
 - name: build-notify
   image: plugins/slack
   settings:
     room: drone
-    webhook: 
+    webhook:
       from_secret: slack_webhook_url
 
-trigger:
-  branch:
-  - master
 
 ---
 kind: pipeline
 name: deploy
 depends_on:
-- build  
+- build
 trigger:
   status:
     - success
@@ -59,7 +66,7 @@ steps:
   image: plugins/slack
   settings:
     room: drone
-    webhook: 
+    webhook:
       from_secret: slack_webhook_url
 ---
 # kind: pipeline
@@ -71,9 +78,4 @@ steps:
 #     - failed
 # steps:
 # - name: rollback-deployment
-
-
-
-
-
 

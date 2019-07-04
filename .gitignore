@@ -4,3 +4,4 @@ certs/*
 .vscode/*
 .env
 tmp/
+env.code-workspace
