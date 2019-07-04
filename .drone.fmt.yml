@@ -1,0 +1,72 @@
+---
+kind: pipeline
+name: build
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: inspect
+  image: alpine
+  commands:
+  - "printenv | sort"
+  - find -name Dockerfile -type f
+
+- name: build-docker
+  image: plugins/gcr
+  settings:
+    auto_tag: true
+    dockerfile: src/Dockerfile
+    json_key:
+      from_secret: registry_credentials
+    password:
+      from_secret: docker_password
+    repo: "eu.gcr.io/digitaloctober-nuxt/${DRONE_REPO_NAME}"
+    username:
+      from_secret: docker_username
+
+- name: build-notify
+  image: plugins/slack
+  settings:
+    room: drone
+    webhook:
+      from_secret: slack_webhook_url
+
+trigger:
+  branch:
+  - master
+
+---
+kind: pipeline
+name: deploy
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: deploy
+  image: quay.io/honestbee/drone-kubernetes
+
+- name: publish-notify
+  image: plugins/slack
+  settings:
+    room: drone
+    webhook:
+      from_secret: slack_webhook_url
+
+trigger:
+  status:
+  - success
+
+depends_on:
+- build
+
+---
+
+platform:
+  os: linux
+  arch: amd64
+
+...
