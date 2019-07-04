@@ -1,60 +1,79 @@
 kind: pipeline
-name: default
-
+name: build
+# eu.gcr.io
+# digitaloctober-nuxt
 steps:
 - name: inspect
   image: alpine
   commands:
-  - pwd
-  - ls -lAh
-  - cd src
+  - printenv | sort
   - find -name Dockerfile -type f
-  - echo "DRONE_REPO_NAME=${DRONE_REPO_NAME}"
 
 - name: build-docker
-  image: plugins/docker
+  # image: plugins/docker
+  image: plugins/gcr
   settings:
-    repo: kapb14/${DRONE_REPO_NAME}
-    #context: /drone/src/src
+    repo: eu.gcr.io/digitaloctober-nuxt/${DRONE_REPO_NAME}
+    # repo: kapb14/${DRONE_REPO_NAME}
     auto_tag: true
     dockerfile: src/Dockerfile
     username:
       from_secret: docker_username
     password:
       from_secret: docker_password
+    json_key:
+      from_secret: gcr_auth
 
 - name: build-notify
   image: plugins/slack
   settings:
     room: drone
-    webhook: https://hooks.slack.com/services/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
+    webhook: 
+      from_secret: slack_webhook_url
 
-- name: publish
-  image: plugins/gcr
-  settings:
-    repo: kapb14/${DRONE_REPO_NAME}
-    tags: latest
-    json_key:
-      from_secret: google_credentials
+trigger:
+  branch:
+  - master
 
+---
+kind: pipeline
+name: deploy
+depends_on:
+- build  
+trigger:
+  status:
+    - success
+steps:
+- name: deploy
+  image: quay.io/honestbee/drone-kubernetes
+  kubernetes_server:
+    from_secret: kubernetes_server_secret
+  kubernetes_token:
+    from_secret: kubernetes_token_secret
+  namespace: default
+  deployment: ${DRONE_REPO_NAME}
+  repo: eu.gcr.io/digitaloctober-nuxt/${DRONE_REPO_NAME}
+  container: my-container
+  # tag: mytag
 - name: publish-notify
   image: plugins/slack
   settings:
     room: drone
-    webhook: https://hooks.slack.com/services/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
+    webhook: 
+      from_secret: slack_webhook_url
+---
+# kind: pipeline
+# name: rollback
+# depends_on:
+# - deploy
+# trigger:
+#   status:
+#     - failed
+# steps:
+# - name: rollback-deployment
 
-#- name: deploy
-#  image: quay.io/honestbee/drone-kubernetes
-#  kubernetes_server: https://kubernetes.company.org
-#  kubernetes_token: CXHVLJSDKJFS...
-#  namespace: default
-#  deployment: digitaloctober-example
-#  repo: myorg/myrepo
-#  container: my-container
-#  tag: mytag
 
-#commands:
-#- docker build -t ${DRONE_REPO_NAME}:${DRONE_COMMIT_SHA} ./src
+
 
 
 
